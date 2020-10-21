@@ -1,6 +1,6 @@
 class Movie < ActiveRecord::Base
   def self.with_ratings(ratings_list)
-    if ratings_list == nil
+    if ratings_list == nil or ratings_list == []
       return self.with_ratings(self.all_ratings)
     else 
       return self.where(rating: ratings_list)
