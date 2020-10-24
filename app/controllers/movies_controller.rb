@@ -7,30 +7,44 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @all_ratings = Movie.all_ratings
-    ratings_list = params[:ratings]
-    if ratings_list == nil
-      ratings_list = Hash[]
+    puts params
+    if params["home"] == "1"
+      session_hash = session["a"]
+      puts "incomming session hash"
+      puts session_hash
+      @ratings_to_show = session_hash["ratings"]
+      @sort_val = session_hash["refresh"]
+      puts "sort from session"
+      puts @sort_val
+    else
+      ratings_list = params[:ratings]
+      @sort_val = params[:refresh]
+      if ratings_list == nil
+        ratings_list = Hash[]
+      end
+      puts "ratings list"
+      puts ratings_list
+      @ratings_to_show = ratings_list.keys
     end
-    @ratings_to_show = ratings_list.keys
+    @all_ratings = Movie.all_ratings
+    
+    puts @ratings_to_show
     @movies = Movie.with_ratings(@ratings_to_show)
     @ratings_hash = Hash[@ratings_to_show.collect { |rating| [rating, 1] } ]
-    sort_by = params[:sort]
-    if sort_by == "title"
+    if @sort_val == "title"
       @title_sort = true
       @release_date_sort = false
       @movies = Movie.sort_by_title(@ratings_to_show)
-      @sort_hash = :title
     end
-    if sort_by == "release_date"
+    if @sort_val == "release_date"
       @title_sort = false
       @release_date_sort = true
       @movies = Movie.sort_by_release_date(@ratings_to_show)
-      @sort_hash = "release_date"
     end
-    puts @sort_hash
-    puts @ratings_hash
-    puts params
+    session_hash = {:ratings => @ratings_to_show, :refresh => @sort_val}
+    session[:a] = session_hash
+    puts "session hash at end"
+    puts session[:a]
   end
 
   def new
